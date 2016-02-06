@@ -1,0 +1,27 @@
+{
+  "name": "goertzel-node",
+  "version": "1.0.0",
+  "description": "WebAudio Node that implements a goertzel filter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/notthetup/goertzel-node.git"
+  },
+  "keywords": [
+    "webaudio",
+    "audio",
+    "node",
+    "filter",
+    "frequency",
+    "fft"
+  ],
+  "author": "Chinmay Pendharkar <notthetup@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/notthetup/goertzel-node/issues"
+  },
+  "homepage": "https://github.com/notthetup/goertzel-node#readme"
+}
