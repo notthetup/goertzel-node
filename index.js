@@ -42,7 +42,7 @@ function GoertzelNode (context, chunkSize){
 
     for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
       var inputData = inputBuffer.getChannelData(channel);
-      outputBuffer.copyFromChannel(inputData,channel,0);
+      outputBuffer.copyToChannel(inputData,channel,0);
     }
   }
 
