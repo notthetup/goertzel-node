@@ -1,28 +1,52 @@
 var gf = require('goertzel-filter');
 
-function GoertzelNode (context){
+function GoertzelNode (context, chunkSize){
   if (!context){
     console.error("No AudioContext provided");
     return;
   }
 
-  this.power = 0;
+  chunkSize = chunkSize || 256;
 
-  Object.defineProperty(this,'targetFrequency',{
+  var processor = context.createScriptProcessor(chunkSize,1,1);
+  gf.init(540, context.sampleRate, chunkSize);
+
+  processor.power = 0;
+  processor.treshold = 2000;
+
+  Object.defineProperty(processor,'targetFrequency',{
     set: function(freq){
-      gf.targetFrequency = freq;
+      gf.init(freq,context.sampleRate, chunkSize);
     },
     get: function(){
       return gf.targetFrequency;
     }
   });
 
-  this.processor = context.createScriptProcessor(128,1,1);
+  var _channel = 0;
+  Object.defineProperty(processor,'channel',{
+    set: function(channel){
+      _channel = channel;
+    },
+    get: function(){
+      return _channel;
+    }
+  });
 
-  scriptNode.onaudioprocess = function(audioProcessingEvent){
-     var inputBuffer = audioProcessingEvent.inputBuffer;
-     this.power = gf.run(inputBuffer.getChannelData(channel));
+  processor.onaudioprocess = function(audioProcessingEvent){
+    var inputBuffer = audioProcessingEvent.inputBuffer;
+    var outputBuffer = audioProcessingEvent.outputBuffer;
+
+    processor.power = gf.run(inputBuffer.getChannelData(_channel));
+    processor.detected = processor.power > processor.treshold;
+
+    for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+      var inputData = inputBuffer.getChannelData(channel);
+      outputBuffer.copyFromChannel(inputData,channel,0);
+    }
   }
+
+  return processor;
 }
 
 GoertzelNode.prototype.connect = function(){
