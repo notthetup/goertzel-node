@@ -25,6 +25,9 @@
   },
   "homepage": "https://github.com/notthetup/goertzel-node#readme",
   "dependencies": {
+    "goertzel-filter": "^1.0.0"
+  },
+  "devDependencies": {
     "browserify": "^13.0.0",
     "http-server": "^0.9.0"
   }
