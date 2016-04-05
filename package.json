@@ -4,6 +4,7 @@
   "description": "WebAudio Node that implements a goertzel filter",
   "main": "index.js",
   "scripts": {
+    "build": "browserify index.js --s GoertzelNode > dist/goertzelnode.js ",
     "test": "browserify test/test.js > test/bundle.js && http-server test/"
   },
   "repository": {

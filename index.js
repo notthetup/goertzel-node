@@ -12,7 +12,7 @@ function GoertzelNode (context, chunkSize){
   gf.init(540, context.sampleRate, chunkSize);
 
   processor.power = 0;
-  processor.treshold = 2000;
+  processor.threshold = 2000;
 
   Object.defineProperty(processor,'targetFrequency',{
     set: function(freq){
@@ -38,7 +38,7 @@ function GoertzelNode (context, chunkSize){
     var outputBuffer = audioProcessingEvent.outputBuffer;
 
     processor.power = gf.run(inputBuffer.getChannelData(_channel));
-    processor.detected = processor.power > processor.treshold;
+    processor.detected = processor.power > processor.threshold;
 
     for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
       var inputData = inputBuffer.getChannelData(channel);
