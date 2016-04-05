@@ -79,7 +79,7 @@ var result = gn.detected; //boolean true/false
 	```
 	gn.targetFrequency = 440; // Set the frequency to be detected to be 440.
 	```
-  - `targetFrequency` can be set at any time. Once set, the GoertzelNode will start calculating and outputting the values for that frequency at every chunk.
+	- `targetFrequency` can be set at any time. Once set, the GoertzelNode will start calculating and outputting the values for that frequency at every chunk.
 
 - `channel`: __Number__ - The value of the frequency that is to be detected by the GoertzelNode. The default value is 1.
 
@@ -87,8 +87,7 @@ var result = gn.detected; //boolean true/false
 	```
 	gn.channel = 1; // Set the channel of the input audio stream to be analyzed.
 	```
-  - Since WebAudio streams can have multiple channels and the Goertzel algorithm run on individual channels, this property allows one to choose which channel to run the  Goertzel algorithm on.
-  -
+	- Since WebAudio streams can have multiple channels and the Goertzel algorithm run on individual channels, this property allows one to choose which channel to run the  Goertzel algorithm on.
 
 - `power`: __Number__ - Returns the power of the audio of the input audio stream at the `targetFrequency`.
 
@@ -96,7 +95,7 @@ var result = gn.detected; //boolean true/false
 	```
 	var power = gn.power;  // Get the power.
 	```
-  - This is the result of Goertzel algorithm. It can be used to decide if enough energy is detected at the `targetFrequency`.
+	- This is the result of Goertzel algorithm. It can be used to decide if enough energy is detected at the `targetFrequency`.
 
 - `threshold`: __Number__ - Sets a threshold of power used to decide if the `targetFrequency` was `detected`.
 
@@ -104,7 +103,7 @@ var result = gn.detected; //boolean true/false
 	```
 	gn.threshold = 2000;  // Set the threshold to 2000.
 	```
-  - If calculated `power` power is higher than `threshold` then `detected` is set as true.
+	- If calculated `power` power is higher than `threshold` then `detected` is set as true.
 
 - `detected`: __Boolean__ - Returns if the `targetFrequency` was detected in the input audio stream.
 
