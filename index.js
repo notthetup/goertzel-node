@@ -9,7 +9,7 @@ function GoertzelNode (context, chunkSize){
   chunkSize = chunkSize || 256;
 
   var processor = context.createScriptProcessor(chunkSize,1,1);
-  gf.init(540, context.sampleRate, chunkSize);
+  gf.init(440, context.sampleRate, chunkSize);
 
   processor.power = 0;
   processor.threshold = 2000;

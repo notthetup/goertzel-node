@@ -1,4 +1,68 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.GoertzelNode = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var gf = require('goertzel-filter');
+
+function GoertzelNode (context, chunkSize){
+  if (!context){
+    console.error("No AudioContext provided");
+    return;
+  }
+
+  chunkSize = chunkSize || 256;
+
+  var processor = context.createScriptProcessor(chunkSize,1,1);
+  gf.init(440, context.sampleRate, chunkSize);
+
+  processor.power = 0;
+  processor.threshold = 2000;
+
+  Object.defineProperty(processor,'targetFrequency',{
+    set: function(freq){
+      gf.init(freq,context.sampleRate, chunkSize);
+    },
+    get: function(){
+      return gf.targetFrequency;
+    }
+  });
+
+  var _channel = 0;
+  Object.defineProperty(processor,'channel',{
+    set: function(channel){
+      _channel = channel;
+    },
+    get: function(){
+      return _channel;
+    }
+  });
+
+  processor.onaudioprocess = function(audioProcessingEvent){
+    var inputBuffer = audioProcessingEvent.inputBuffer;
+    var outputBuffer = audioProcessingEvent.outputBuffer;
+
+    processor.power = gf.run(inputBuffer.getChannelData(_channel));
+    processor.detected = processor.power > processor.threshold;
+
+    for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+      var inputData = inputBuffer.getChannelData(channel);
+      outputBuffer.copyToChannel(inputData,channel,0);
+    }
+  }
+
+  return processor;
+}
+
+GoertzelNode.prototype.connect = function(){
+  processor.connect.apply(processor,arguments);
+}
+
+
+GoertzelNode.prototype.disconnect = function(){
+  processor.disconnect.apply(processor,arguments);
+}
+
+
+module.exports = GoertzelNode
+
+},{"goertzel-filter":2}],2:[function(require,module,exports){
 (function (global){
 function GoertzelFilterASM(stdlib, foreign, heap){
   "use asm";
@@ -70,69 +134,5 @@ module.exports = {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],2:[function(require,module,exports){
-var gf = require('goertzel-filter');
-
-function GoertzelNode (context, chunkSize){
-  if (!context){
-    console.error("No AudioContext provided");
-    return;
-  }
-
-  chunkSize = chunkSize || 256;
-
-  var processor = context.createScriptProcessor(chunkSize,1,1);
-  gf.init(540, context.sampleRate, chunkSize);
-
-  processor.power = 0;
-  processor.treshold = 2000;
-
-  Object.defineProperty(processor,'targetFrequency',{
-    set: function(freq){
-      gf.init(freq,context.sampleRate, chunkSize);
-    },
-    get: function(){
-      return gf.targetFrequency;
-    }
-  });
-
-  var _channel = 0;
-  Object.defineProperty(processor,'channel',{
-    set: function(channel){
-      _channel = channel;
-    },
-    get: function(){
-      return _channel;
-    }
-  });
-
-  processor.onaudioprocess = function(audioProcessingEvent){
-    var inputBuffer = audioProcessingEvent.inputBuffer;
-    var outputBuffer = audioProcessingEvent.outputBuffer;
-
-    processor.power = gf.run(inputBuffer.getChannelData(_channel));
-    processor.detected = processor.power > processor.treshold;
-
-    for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
-      var inputData = inputBuffer.getChannelData(channel);
-      outputBuffer.copyToChannel(inputData,channel,0);
-    }
-  }
-
-  return processor;
-}
-
-GoertzelNode.prototype.connect = function(){
-  processor.connect.apply(processor,arguments);
-}
-
-
-GoertzelNode.prototype.disconnect = function(){
-  processor.disconnect.apply(processor,arguments);
-}
-
-
-module.exports = GoertzelNode
-
-},{"goertzel-filter":1}]},{},[2])(2)
+},{}]},{},[1])(1)
 });
