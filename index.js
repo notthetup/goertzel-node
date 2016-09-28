@@ -12,7 +12,7 @@ function GoertzelNode (context, chunkSize){
   gf.init(440, context.sampleRate, chunkSize);
 
   processor.power = 0;
-  processor.threshold = 2000;
+  processor.threshold = 0.21;
 
   Object.defineProperty(processor,'targetFrequency',{
     set: function(freq){

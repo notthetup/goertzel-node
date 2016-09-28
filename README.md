@@ -90,7 +90,7 @@ var result = gn.detected; //boolean true/false
 	gn.passthrough = false; // Ensures that audio from the oscillator doesn't get played out.
 	```
 
-- `channel`: __Number__ - The value of the frequency that is to be detected by the GoertzelNode. The default value is 1.
+- `channel`: __Number__ - The channel of the input audio stream to be used for analysis. The default value is 1.
 
 	eg:
 	```
@@ -98,7 +98,7 @@ var result = gn.detected; //boolean true/false
 	```
 	- Since WebAudio streams can have multiple channels and the Goertzel algorithm run on individual channels, this property allows one to choose which channel to run the  Goertzel algorithm on.
 
-- `power`: __Number__ - Returns the power of the audio of the input audio stream at the `targetFrequency`.
+- `power`: __Number__ - Returns the power of the audio of the input audio stream at the `targetFrequency`. This value is normalised to `chunkSize` and should be a maximum of `0.25` for a perfect match.
 
 	eg:
 	```
@@ -110,7 +110,7 @@ var result = gn.detected; //boolean true/false
 
 	eg:
 	```
-	gn.threshold = 2000;  // Set the threshold to 2000.
+	gn.threshold = 0.22;  // Set the threshold to 0.22.
 	```
 	- If calculated `power` power is higher than `threshold` then `detected` is set as true.
 

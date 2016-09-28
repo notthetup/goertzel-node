@@ -1,6 +1,6 @@
 {
   "name": "goertzel-node",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "WebAudio Node that implements a goertzel filter",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/notthetup/goertzel-node#readme",
   "dependencies": {
-    "goertzel-filter": "^1.0.0"
+    "goertzel-filter": "^2.0.0"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
