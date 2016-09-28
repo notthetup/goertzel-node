@@ -1,4 +1,72 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var gf = require('goertzel-filter');
+
+function GoertzelNode (context, chunkSize){
+  if (!context){
+    console.error("No AudioContext provided");
+    return;
+  }
+
+  chunkSize = chunkSize || 256;
+
+  var processor = context.createScriptProcessor(chunkSize,1,1);
+  gf.init(440, context.sampleRate, chunkSize);
+
+  processor.power = 0;
+  processor.threshold = 2000;
+
+  Object.defineProperty(processor,'targetFrequency',{
+    set: function(freq){
+      gf.init(freq,context.sampleRate, chunkSize);
+    },
+    get: function(){
+      return gf.targetFrequency;
+    }
+  });
+
+  var _channel = 0;
+  Object.defineProperty(processor,'channel',{
+    set: function(channel){
+      _channel = channel;
+    },
+    get: function(){
+      return _channel;
+    }
+  });
+
+  this.mute = false;
+
+  processor.onaudioprocess = function(audioProcessingEvent){
+    var inputBuffer = audioProcessingEvent.inputBuffer;
+    var outputBuffer = audioProcessingEvent.outputBuffer;
+
+    processor.power = gf.run(inputBuffer.getChannelData(_channel));
+    processor.detected = processor.power > processor.threshold;
+
+    if (!this.mute){
+      for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+        var inputData = inputBuffer.getChannelData(channel);
+        outputBuffer.copyToChannel(inputData,channel,0);
+      }
+    }
+  }
+
+  return processor;
+}
+
+GoertzelNode.prototype.connect = function(){
+  processor.connect.apply(processor,arguments);
+}
+
+
+GoertzelNode.prototype.disconnect = function(){
+  processor.disconnect.apply(processor,arguments);
+}
+
+
+module.exports = GoertzelNode
+
+},{"goertzel-filter":2}],2:[function(require,module,exports){
 (function (global){
 function GoertzelFilterASM(stdlib, foreign, heap){
   "use asm";
@@ -70,71 +138,7 @@ module.exports = {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],2:[function(require,module,exports){
-var gf = require('goertzel-filter');
-
-function GoertzelNode (context, chunkSize){
-  if (!context){
-    console.error("No AudioContext provided");
-    return;
-  }
-
-  chunkSize = chunkSize || 256;
-
-  var processor = context.createScriptProcessor(chunkSize,1,1);
-  gf.init(540, context.sampleRate, chunkSize);
-
-  processor.power = 0;
-  processor.treshold = 2000;
-
-  Object.defineProperty(processor,'targetFrequency',{
-    set: function(freq){
-      gf.init(freq,context.sampleRate, chunkSize);
-    },
-    get: function(){
-      return gf.targetFrequency;
-    }
-  });
-
-  var _channel = 0;
-  Object.defineProperty(processor,'channel',{
-    set: function(channel){
-      _channel = channel;
-    },
-    get: function(){
-      return _channel;
-    }
-  });
-
-  processor.onaudioprocess = function(audioProcessingEvent){
-    var inputBuffer = audioProcessingEvent.inputBuffer;
-    var outputBuffer = audioProcessingEvent.outputBuffer;
-
-    processor.power = gf.run(inputBuffer.getChannelData(_channel));
-    processor.detected = processor.power > processor.treshold;
-
-    for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
-      var inputData = inputBuffer.getChannelData(channel);
-      outputBuffer.copyToChannel(inputData,channel,0);
-    }
-  }
-
-  return processor;
-}
-
-GoertzelNode.prototype.connect = function(){
-  processor.connect.apply(processor,arguments);
-}
-
-
-GoertzelNode.prototype.disconnect = function(){
-  processor.disconnect.apply(processor,arguments);
-}
-
-
-module.exports = GoertzelNode
-
-},{"goertzel-filter":1}],3:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var GoertzelNode = require('../index.js');
 
 window.addEventListener('load', function(){
@@ -143,6 +147,7 @@ window.addEventListener('load', function(){
   var audioContext = new AudioContext();
   var osc = audioContext.createOscillator();
   var gn = new GoertzelNode(audioContext);
+  gn.mute = true;
 
   osc.connect(gn);
   gn.connect(audioContext.destination);
@@ -172,4 +177,4 @@ window.addEventListener('load', function(){
   },1000)
 });
 
-},{"../index.js":2}]},{},[3]);
+},{"../index.js":1}]},{},[3]);

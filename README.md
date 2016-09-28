@@ -81,6 +81,15 @@ var result = gn.detected; //boolean true/false
 	```
 	- `targetFrequency` can be set at any time. Once set, the GoertzelNode will start calculating and outputting the values for that frequency at every chunk.
 
+- `passthrough`: __Boolean__ - Boolean value defining if the Node passes the audio through to the destination or not. Default value is `true`.
+
+	eg:
+	```
+	osc.connect(gn);
+	gn.connect(context.destination);
+	gn.passthrough = false; // Ensures that audio from the oscillator doesn't get played out.
+	```
+
 - `channel`: __Number__ - The value of the frequency that is to be detected by the GoertzelNode. The default value is 1.
 
 	eg:

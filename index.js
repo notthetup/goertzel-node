@@ -33,6 +33,8 @@ function GoertzelNode (context, chunkSize){
     }
   });
 
+  this.passthrough = true;
+
   processor.onaudioprocess = function(audioProcessingEvent){
     var inputBuffer = audioProcessingEvent.inputBuffer;
     var outputBuffer = audioProcessingEvent.outputBuffer;
@@ -40,9 +42,11 @@ function GoertzelNode (context, chunkSize){
     processor.power = gf.run(inputBuffer.getChannelData(_channel));
     processor.detected = processor.power > processor.threshold;
 
-    for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
-      var inputData = inputBuffer.getChannelData(channel);
-      outputBuffer.copyToChannel(inputData,channel,0);
+    if (this.passthrough){
+      for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+        var inputData = inputBuffer.getChannelData(channel);
+        outputBuffer.copyToChannel(inputData,channel,0);
+      }
     }
   }
 

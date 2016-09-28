@@ -6,6 +6,7 @@ window.addEventListener('load', function(){
   var audioContext = new AudioContext();
   var osc = audioContext.createOscillator();
   var gn = new GoertzelNode(audioContext);
+  gn.passthrough = true;
 
   osc.connect(gn);
   gn.connect(audioContext.destination);
