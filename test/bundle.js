@@ -1,15 +1,16 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var gf = require('goertzel-filter');
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+var GF = require('goertzel-filter');
 
 function GoertzelNode (context, chunkSize){
   if (!context){
-    console.error("No AudioContext provided");
+    console.error('No AudioContext provided');
     return;
   }
 
   chunkSize = chunkSize || 256;
 
   var processor = context.createScriptProcessor(chunkSize,1,1);
+  var gf = new GF();
   gf.init(440, context.sampleRate, chunkSize);
 
   processor.power = 0;
@@ -49,19 +50,19 @@ function GoertzelNode (context, chunkSize){
         outputBuffer.copyToChannel(inputData,channel,0);
       }
     }
-  }
+  };
 
   return processor;
 }
 
 GoertzelNode.prototype.connect = function(){
-  processor.connect.apply(processor,arguments);
-}
+  this.processor.connect.apply(this.processor,arguments);
+};
 
 
 GoertzelNode.prototype.disconnect = function(){
-  processor.disconnect.apply(processor,arguments);
-}
+  this.processor.disconnect.apply(this.processor,arguments);
+};
 
 
 module.exports = GoertzelNode
@@ -69,7 +70,7 @@ module.exports = GoertzelNode
 },{"goertzel-filter":2}],2:[function(require,module,exports){
 (function (global){
 function GoertzelFilterASM(stdlib, foreign, heap){
-  "use asm";
+  'use asm';
 
   var cos = stdlib.Math.cos;
   var PI = stdlib.Math.PI;
@@ -77,6 +78,7 @@ function GoertzelFilterASM(stdlib, foreign, heap){
 
   var coefficient = 0.0;
   var length = 0;
+  // eslint-disable-next-line no-unused-vars
   var targetFrequency = 0.0;
 
   function init(dFreq,sFreq,len){
@@ -106,73 +108,95 @@ function GoertzelFilterASM(stdlib, foreign, heap){
   return {
     init: init,
     run: run
-  }
+  };
 }
 
-var targetFrequency = 0;
-var heapBuffer;
+module.exports = function(){
+  var targetFrequency = 0;
+  var heapBuffer;
+  var goertzelfilter;
+  return {
+    init: function(dFreq,sFreq,length){
+      var stdlib;
+      var heap = new ArrayBuffer(0x10000);
+      heapBuffer =new Float32Array(heap);
 
-module.exports = {
-  init: function(dFreq,sFreq,length){
-    var stdlib;
-    var heap = new ArrayBuffer(0x10000);
-    heapBuffer =new Float32Array(heap);
+      if (typeof window !== 'undefined'){
+        stdlib = window;
+      }else{
+        stdlib = global;
+      }
 
-    if (typeof window !== 'undefined'){
-      stdlib = window;
-    }else{
-      stdlib = global;
-    }
-
-    targetFrequency = dFreq;
-    goertzelfilter = GoertzelFilterASM(stdlib, {}, heap);
-    goertzelfilter.init(dFreq,sFreq,length);
-  },
-  run: function(samples){
-    heapBuffer.set(samples);
-    return goertzelfilter.run();
-  },
-  targetFrequency: targetFrequency
-}
+      targetFrequency = dFreq;
+      goertzelfilter = GoertzelFilterASM(stdlib, {}, heap);
+      goertzelfilter.init(dFreq,sFreq,length);
+    },
+    run: function(samples){
+      heapBuffer.set(samples);
+      return goertzelfilter.run();
+    },
+    targetFrequency: targetFrequency
+  };
+};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],3:[function(require,module,exports){
 var GoertzelNode = require('../index.js');
 
 window.addEventListener('load', function(){
-  window.AudioContext = window.webkitAudioContext || window.AudioContext;
+  document.getElementById('btn').addEventListener('click', function () {
+    window.AudioContext = window.webkitAudioContext || window.AudioContext;
 
-  var audioContext = new AudioContext();
-  var osc = audioContext.createOscillator();
-  var gn = new GoertzelNode(audioContext);
-  gn.passthrough = true;
+    var audioContext = new AudioContext();
+    var osc = audioContext.createOscillator();
 
-  osc.connect(gn);
-  gn.connect(audioContext.destination);
+    var gn1 = new GoertzelNode(audioContext);
+    var gn2 = new GoertzelNode(audioContext);
 
-  osc.start();
+    gn1.passthrough = true;
+    gn2.passthrough = true;
 
-  var tFreqSlider = document.querySelector('#tFreq');
-  var tFreqLabel = document.querySelector('#tFreqLabel');
-  var dFreqSlider = document.querySelector('#dFreq');
-  var dFreqLabel = document.querySelector('#dFreqLabel');
+    gn1.targetFrequency = 440;
+    gn2.targetFrequency = 220;
 
-  tFreqSlider.addEventListener('input', function(){
-    var tFreq = parseFloat(tFreqSlider.value);
-    osc.frequency.value = tFreq;
-    tFreqLabel.innerHTML = tFreq + " Hz";
+
+    osc.connect(gn1);
+    gn1.connect(audioContext.destination);
+
+    osc.connect(gn2);
+    gn2.connect(audioContext.destination);
+
+    osc.start();
+
+    var tFreqSlider = document.querySelector('#tFreq');
+    var tFreqLabel = document.querySelector('#tFreqLabel');
+    var dFreqSlider1 = document.querySelector('#dFreq1');
+    var dFreqLabel1 = document.querySelector('#dFreqLabel1');
+    var dFreqSlider2 = document.querySelector('#dFreq2');
+    var dFreqLabel2 = document.querySelector('#dFreqLabel2');
+
+    tFreqSlider.addEventListener('input', function () {
+      var tFreq = parseFloat(tFreqSlider.value);
+      osc.frequency.value = tFreq;
+      tFreqLabel.innerHTML = tFreq + ' Hz';
+    });
+
+    dFreqSlider1.addEventListener('input', function () {
+      var dFreq = parseFloat(dFreqSlider1.value);
+      gn1.targetFrequency = dFreq;
+      dFreqLabel1.innerHTML = dFreq + ' Hz';
+    });
+
+    dFreqSlider2.addEventListener('input', function () {
+      var dFreq2 = parseFloat(dFreqSlider2.value);
+      gn2.targetFrequency = dFreq2;
+      dFreqLabel2.innerHTML = dFreq2 + ' Hz';
+    });
+
+    window.setInterval(function () {
+      console.table([['GN #1 (' + gn1.targetFrequency + ' Hz ): ', gn1.power, gn1.detected], ['GN #2 (' + gn2.targetFrequency + ' Hz ): ', gn2.power, gn2.detected]]);
+    }, 1000);
   });
-
-  dFreqSlider.addEventListener('input', function(){
-    var dFreq = parseFloat(dFreqSlider.value);
-    gn.targetFrequency = dFreq;
-    dFreqLabel.innerHTML = dFreq + " Hz";
-  });
-
-
-  window.setInterval(function(){
-    console.log(gn.power, gn.detected);
-  },1000)
 });
 
 },{"../index.js":1}]},{},[3]);

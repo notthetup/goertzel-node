@@ -4,6 +4,7 @@
   <script src="/bundle.js"></script>
 </head>
 <body>
+  <button id='btn'>Start!</button>
   <p>
     Test Oscillator Freq :
   </p>
@@ -13,11 +14,20 @@
   </p>
   <div>
     <p>
-      GoertzelNode Detection Frequency :
+      GoertzelNode 1 Detection Frequency :
     </p>
-    <input id="dFreq" type="range" value="440" min="0" max="10000"/>
-    <p id="dFreqLabel">
+    <input id="dFreq1" type="range" value="440" min="0" max="10000"/>
+    <p id="dFreqLabel1">
       440 Hz
+    </p>
+  </div>
+  <div>
+    <p>
+      GoertzelNode 2 Detection Frequency :
+    </p>
+    <input id="dFreq2" type="range" value="220" min="0" max="10000" />
+    <p id="dFreqLabel2">
+      220 Hz
     </p>
   </div>
 </body>
