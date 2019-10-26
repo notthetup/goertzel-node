@@ -1,6 +1,6 @@
 {
   "name": "goertzel-node",
-  "version": "2.1 .0",
+  "version": "2.1.0",
   "description": "WebAudio Node that implements a goertzel filter",
   "main": "index.js",
   "scripts": {
